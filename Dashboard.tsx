@@ -1,0 +1,122 @@
+import React from 'react';
+import { TrainingSession, TrainingStatus } from '../types';
+import { Calendar, Users, FileCheck, ArrowRight, Plus, Clock } from 'lucide-react';
+
+interface DashboardProps {
+  trainings: TrainingSession[];
+  onSelectTraining: (id: string) => void;
+  onNewTraining: () => void;
+}
+
+const Dashboard: React.FC<DashboardProps> = ({ trainings, onSelectTraining, onNewTraining }) => {
+  
+  const stats = {
+    total: trainings.length,
+    completed: trainings.filter(t => t.status === TrainingStatus.COMPLETED).length,
+    active: trainings.filter(t => t.status === TrainingStatus.IN_PROGRESS).length,
+    scheduled: trainings.filter(t => t.status === TrainingStatus.SCHEDULED).length
+  };
+
+  const formatDate = (dateStr: string) => {
+    return dateStr.split('-').reverse().join('/');
+  };
+
+  return (
+    <div className="space-y-8 animate-fade-in">
+      {/* Header & Actions */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Tableau de Bord</h1>
+          <p className="text-gray-500">Gérez vos sessions de formation et émargements.</p>
+        </div>
+        <button
+          onClick={onNewTraining}
+          className="flex items-center justify-center space-x-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-3 rounded-lg shadow-md transition-all transform hover:scale-105"
+        >
+          <Plus size={20} />
+          <span>Nouvelle Session</span>
+        </button>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {[
+          { label: 'Sessions Totales', value: stats.total, icon: <Calendar className="text-blue-500" />, color: 'bg-blue-50' },
+          { label: 'En Cours', value: stats.active, icon: <Users className="text-green-500" />, color: 'bg-green-50' },
+          { label: 'Terminées', value: stats.completed, icon: <FileCheck className="text-purple-500" />, color: 'bg-purple-50' },
+          { label: 'Formation en attente', value: stats.scheduled, icon: <Clock className="text-orange-500" />, color: 'bg-orange-50' },
+        ].map((stat, idx) => (
+          <div key={idx} className={`${stat.color} p-6 rounded-xl border border-gray-100 shadow-sm flex items-center justify-between`}>
+            <div>
+              <p className="text-sm font-medium text-gray-500">{stat.label}</p>
+              <p className="text-2xl font-bold text-gray-800 mt-1">{stat.value}</p>
+            </div>
+            <div className="p-3 bg-white rounded-full shadow-sm">
+              {stat.icon}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Sessions List */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden transition-colors duration-300">
+        <div className="p-6 border-b border-gray-100 flex justify-between items-center">
+          <h2 className="text-lg font-semibold text-gray-800">Sessions Récentes</h2>
+        </div>
+        {trainings.length === 0 ? (
+          <div className="p-12 text-center text-gray-400">
+            <Calendar size={48} className="mx-auto mb-4 opacity-50" />
+            <p>Aucune session enregistrée. Commencez par en créer une.</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead className="bg-gray-50 text-gray-500 text-xs uppercase">
+                <tr>
+                  <th className="px-6 py-4 font-medium">Formation</th>
+                  <th className="px-6 py-4 font-medium">Entreprise</th>
+                  <th className="px-6 py-4 font-medium">Date</th>
+                  <th className="px-6 py-4 font-medium">Statut</th>
+                  <th className="px-6 py-4 font-medium text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {trainings.map((t) => (
+                  <tr key={t.id} className="hover:bg-gray-50 transition-colors group">
+                    <td className="px-6 py-4">
+                      <div className="font-medium text-gray-900">{t.trainingName}</div>
+                      <div className="text-xs text-gray-500">{t.trainerName}</div>
+                    </td>
+                    <td className="px-6 py-4 text-gray-600">{t.companyName}</td>
+                    <td className="px-6 py-4 text-gray-600">{formatDate(t.date)}</td>
+                    <td className="px-6 py-4">
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        t.status === TrainingStatus.IN_PROGRESS ? 'bg-green-100 text-green-700' :
+                        t.status === TrainingStatus.COMPLETED ? 'bg-gray-100 text-gray-700' :
+                        'bg-blue-100 text-blue-700'
+                      }`}>
+                        {t.status === TrainingStatus.IN_PROGRESS ? 'En cours' : 
+                         t.status === TrainingStatus.COMPLETED ? 'Clôturée' : 'Planifiée'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <button 
+                        onClick={() => onSelectTraining(t.id)}
+                        className="text-indigo-600 hover:text-indigo-800 font-medium text-sm flex items-center justify-end space-x-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <span>Ouvrir</span>
+                        <ArrowRight size={16} />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default Dashboard;

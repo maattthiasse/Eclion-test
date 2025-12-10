@@ -1,0 +1,5 @@
+{
+  "name": "Eclion",
+  "description": "Application de gestion de feuilles d'émargement et de génération d'attestations assistée par IA pour les organismes de formation.",
+  "requestFramePermissions": []
+}
